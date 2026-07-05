@@ -17,6 +17,10 @@ class EmailComposerAgent(BaseAgent):
         version = next(v for v in session.tailored_resume_versions if v.version_id == version_id)
         tone = state.get("tone", "professional, concise, internship-friendly")
 
+        candidate_name = ""
+        if session.cv_analysis:
+            candidate_name = getattr(session.cv_analysis, "candidate_name", "") or ""
+
         schema: dict[str, Any] = {
             "type": "object",
             "required": ["subject", "body", "summary"],
@@ -30,7 +34,9 @@ class EmailComposerAgent(BaseAgent):
             task=(
                 "Draft a professional job application email for user review. The email must be concise, "
                 "specific to the role/company when provided, and must not claim details beyond the tailored CV. "
-                "Do not include unresolved placeholders. Do not send the email."
+                "Do not include unresolved placeholders. Do not send the email.\n"
+                "Sign the email with the candidate's real name (candidate_name) if available. Do not use generic "
+                "placeholders like [Applicant Name] or [Your Name]. If candidate_name is empty, sign with 'Applicant'."
             ),
             schema=schema,
             inputs={
@@ -41,10 +47,11 @@ class EmailComposerAgent(BaseAgent):
                 "tailored_resume": version.content,
                 "job_description_text": session.job_description_text,
                 "honesty_report": version.honesty_report,
+                "candidate_name": candidate_name,
             },
             skill_names=["cover-email-writing", "application-safety"],
         )
-        data = await llm_provider.complete_json(prompt, system)
+        data = await llm_provider.complete_json(prompt, system, agent_name=self.name)
         if isinstance(data, dict) and data.get("mock"):
             subject, body = _fallback_email(session)
         else:
@@ -70,6 +77,13 @@ def _fallback_email(session) -> tuple[str, str]:
     subject = f"Application for {role}"
     if session.company_name:
         subject += f" at {company}"
+
+    candidate_name = "Applicant"
+    if session.cv_analysis:
+        candidate_name = getattr(session.cv_analysis, "candidate_name", "") or "Applicant"
+    if not candidate_name:
+        candidate_name = "Applicant"
+
     body = (
         "Dear Hiring Team,\n\n"
         f"I am writing to apply for {role} at {company}. "
@@ -77,6 +91,6 @@ def _fallback_email(session) -> tuple[str, str]:
         "I would appreciate the opportunity to discuss how my background can contribute to your team.\n\n"
         "Thank you for your time and consideration.\n\n"
         "Best regards,\n"
-        "Applicant"
+        f"{candidate_name}"
     )
     return subject, body

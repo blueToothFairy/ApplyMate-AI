@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.config import get_settings
+from app.agents.fit_analysis import FitAnalysisAgent
+from app.agents.resume_rewrite_review import ResumeRewriteReviewAgent
 from app.agents.intake import IntakeAgent
 from app.agents.document_parser import DocumentParserAgent
 from app.agents.jd_analyzer import JDAnalyzerAgent
@@ -29,18 +32,27 @@ class ApplyMateWorkflow:
     """
 
     def __init__(self) -> None:
-        self.pipeline = [
-            IntakeAgent(),
-            DocumentParserAgent(),
-            JDAnalyzerAgent(),
-            CVAnalyzerAgent(),
-            TailoringStrategistAgent(),
-            CVRewriteAgent(),
-            HonestyCriticAgent(),
-            ATSScoringAgent(),
-            EmailComposerAgent(),
-            ApprovalAgent(),
-        ]
+        self.settings = get_settings()
+        if self.settings.agent_execution_mode == "full":
+            self.pipeline = [
+                IntakeAgent(),
+                DocumentParserAgent(),
+                JDAnalyzerAgent(),
+                CVAnalyzerAgent(),
+                TailoringStrategistAgent(),
+                CVRewriteAgent(),
+                HonestyCriticAgent(),
+                ATSScoringAgent(),
+                EmailComposerAgent(),
+                ApprovalAgent(),
+            ]
+        else:
+            self.pipeline = [
+                IntakeAgent(),
+                DocumentParserAgent(),
+                FitAnalysisAgent(),
+                ResumeRewriteReviewAgent(),
+            ]
 
     async def generate(self, request: GenerateRequest) -> WorkflowResponse:
         state = {"request": request}
@@ -54,9 +66,16 @@ class ApplyMateWorkflow:
         store.add_audit(session.application_id, "workflow.generated", {
             "agents": completed_agents,
             "llm_enabled": True,
-            "note": "CV and email drafts are generated for review only; ExpressJS owns final email delivery.",
+            "note": "CV generated for review.",
         })
-        return WorkflowResponse(application=session, review_bundle=create_review_bundle(session, diff))
+        
+        # If ApprovalAgent was not run, return empty dict for review_bundle
+        if "ApprovalAgent" in completed_agents:
+            review_bundle = create_review_bundle(session, diff)
+        else:
+            review_bundle = {}
+            
+        return WorkflowResponse(application=session, review_bundle=review_bundle)
 
     async def parse_only(self, request: GenerateRequest) -> dict:
         state = {"request": request}
@@ -77,28 +96,41 @@ class ApplyMateWorkflow:
         session = store.get(application_id)
         selected_version = next(v for v in session.tailored_resume_versions if v.version_id == session.selected_resume_version_id)
 
-        if target in ["resume", "both"]:
-            revised_resume = await self._revise_resume_with_llm(session, selected_version.content, feedback)
-            version = ResumeVersion(
-                version_id=make_id("rv"),
-                content=revised_resume["tailored_resume"],
-                change_summary=revised_resume.get("change_summary", [f"Applied user feedback: {feedback}"]),
-                honesty_report={
-                    "status": "pending_honesty_review",
-                    "notes": ["Revision created by LLM and should be reviewed again."],
-                    "unsupported_claim_warnings_from_revision": revised_resume.get("unsupported_claim_warnings", []),
-                },
-                match_score=selected_version.match_score,
-            )
-            session.tailored_resume_versions.append(version)
-            session.selected_resume_version_id = version.version_id
-            # Re-run honesty + score on the revised resume.
-            state = {"session": session}
-            await HonestyCriticAgent().run(state)
-            await ATSScoringAgent().run(state)
+        if self.settings.agent_execution_mode == "full":
+            if target in ["resume", "both"]:
+                revised_resume = await self._revise_resume_with_llm(session, selected_version.content, feedback)
+                version = ResumeVersion(
+                    version_id=make_id("rv"),
+                    content=revised_resume["tailored_resume"],
+                    change_summary=revised_resume.get("change_summary", [f"Applied user feedback: {feedback}"]),
+                    honesty_report={
+                        "status": "pending_honesty_review",
+                        "notes": ["Revision created by LLM and should be reviewed again."],
+                        "unsupported_claim_warnings_from_revision": revised_resume.get("unsupported_claim_warnings", []),
+                    },
+                    match_score=selected_version.match_score,
+                )
+                session.tailored_resume_versions.append(version)
+                session.selected_resume_version_id = version.version_id
+                # Re-run honesty + score on the revised resume.
+                state = {"session": session}
+                await HonestyCriticAgent().run(state)
+                await ATSScoringAgent().run(state)
 
-        if target in ["email", "both"]:
-            await self._revise_email_with_llm(session, feedback)
+            if target in ["email", "both"]:
+                await self._revise_email_with_llm(session, feedback)
+        else:
+            if target in ["resume", "both"]:
+                state = {
+                    "session": session,
+                    "user_feedback": feedback,
+                    "current_tailored_resume": selected_version.content,
+                }
+                await ResumeRewriteReviewAgent().run(state)
+
+            if target in ["email", "both"]:
+                if session.email_draft:
+                    await self._revise_email_with_llm(session, feedback)
 
         # Any content change invalidates prior approval.
         session.approval_status = "not_requested"

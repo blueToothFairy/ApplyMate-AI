@@ -55,6 +55,22 @@ def list_skills() -> dict:
     return {"skills": SkillLoader().list_skills()}
 
 
+@app.get("/ai/diagnostics/counters")
+def get_counters() -> dict:
+    from app.services.llm_provider import llm_provider
+    return {
+        "logical_call_count": llm_provider.logical_call_count,
+        "retry_attempt_count": llm_provider.retry_attempt_count,
+    }
+
+
+@app.post("/ai/diagnostics/reset")
+def reset_counters() -> dict:
+    from app.services.llm_provider import llm_provider
+    llm_provider.reset_call_counter()
+    return {"status": "reset"}
+
+
 
 @app.post("/ai/documents/parse", response_model=DocumentParseResponse)
 def parse_document(request: DocumentParseRequest) -> DocumentParseResponse:

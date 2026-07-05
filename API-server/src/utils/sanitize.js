@@ -1,4 +1,4 @@
-const PLACEHOLDER_RE = /\[[^\]]+\]|\{\{[^}]+\}\}|<[^>]+>/g;
+const PLACEHOLDER_RE = /\[[^\]]+\]|\{\{[^}]+\}\}|<[^>]+>/;
 
 export function normalizeString(value) {
   return typeof value === 'string' ? value.trim() : '';

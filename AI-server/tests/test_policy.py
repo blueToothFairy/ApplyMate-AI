@@ -15,6 +15,9 @@ async def test_validate_send_requires_approval():
         recipient_email="hr@example.com",
     ))
     app = response.application
+    # Draft email explicitly in fast mode
+    draft_response = await workflow.draft_email(app.application_id)
+    app = draft_response.application
     assert app.email_draft is not None
     validation = validate_send_policy(ValidateSendRequest(
         application_id=app.application_id,

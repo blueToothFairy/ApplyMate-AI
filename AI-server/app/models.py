@@ -120,32 +120,67 @@ class StructuredJD(BaseModel):
 
 
 class JDAnalysis(BaseModel):
+    # Legacy fields
     jd_requirements: dict[str, list[str]] = Field(default_factory=dict)
     jd_keywords: list[str] = Field(default_factory=list)
-    role_focus: dict[str, str] = Field(default_factory=dict)
     priority_matrix: list[dict[str, Any]] = Field(default_factory=list)
+
+    # Union field to accept both legacy dict and new string role focus
+    role_focus: dict[str, str] | str = ""
+
+    # New fast agent fields
+    role_title: str = ""
+    company_name: str = ""
+    responsibilities: list[str] = Field(default_factory=list)
+    must_have_requirements: list[str] = Field(default_factory=list)
+    nice_to_have_requirements: list[str] = Field(default_factory=list)
+    technical_keywords: list[str] = Field(default_factory=list)
+    soft_skill_keywords: list[str] = Field(default_factory=list)
+    domain_keywords: list[str] = Field(default_factory=list)
+    seniority_level: str = ""
 
 
 class CVAnalysis(BaseModel):
+    # Legacy fields
     cv_strengths: list[str] = Field(default_factory=list)
     cv_weaknesses: list[str] = Field(default_factory=list)
     missing_keywords: list[str] = Field(default_factory=list)
     weak_bullets: list[str] = Field(default_factory=list)
     improvement_opportunities: list[str] = Field(default_factory=list)
 
+    # New fast agent fields
+    candidate_name: str = ""
+    current_positioning: str = ""
+    supported_skills: list[str] = Field(default_factory=list)
+    supported_projects: list[str] = Field(default_factory=list)
+    strong_evidence: list[str] = Field(default_factory=list)
+    weak_or_missing_keywords: list[str] = Field(default_factory=list)
+    unsupported_jd_claims_to_avoid: list[str] = Field(default_factory=list)
+    most_relevant_experiences: list[str] = Field(default_factory=list)
+
 
 class TailoringStrategy(BaseModel):
-    tailoring_strategy: str
+    # Legacy fields
+    tailoring_strategy: str = ""
     rewrite_plan: list[str] = Field(default_factory=list)
     section_priority: list[str] = Field(default_factory=list)
     evidence_map: dict[str, str] = Field(default_factory=dict)
+
+    # New fast agent fields
+    summary_direction: str = ""
+    skills_to_emphasize: list[str] = Field(default_factory=list)
+    projects_to_prioritize: list[str] = Field(default_factory=list)
+    bullets_to_rewrite: list[str] = Field(default_factory=list)
+    keywords_to_add_if_supported: list[str] = Field(default_factory=list)
+    claims_to_avoid: list[str] = Field(default_factory=list)
+    tone: str = "professional, concise, factual"
 
 
 class ResumeVersion(BaseModel):
     version_id: str
     content: str
     created_at: str = Field(default_factory=now_iso)
-    change_summary: list[str] = Field(default_factory=list)
+    change_summary: list[Any] = Field(default_factory=list)
     honesty_report: dict[str, Any] = Field(default_factory=dict)
     match_score: int = 0
 
@@ -207,3 +242,53 @@ class PolicyValidationResponse(BaseModel):
     allowed: bool
     reasons: list[str] = Field(default_factory=list)
     send_payload: dict[str, Any] | None = None
+
+
+class FitAnalysisResult(BaseModel):
+    jd_analysis: JDAnalysis
+    cv_analysis: CVAnalysis
+    tailoring_strategy: TailoringStrategy
+
+
+class TailoredResumeSection(BaseModel):
+    summary: str = ""
+    skills: list[str] = Field(default_factory=list)
+    projects: list[str] = Field(default_factory=list)
+    education: str = ""
+
+
+class TailoredResumeDetails(BaseModel):
+    content: str
+    format: str = "markdown"
+    sections: TailoredResumeSection
+
+
+class ChangeSummaryItem(BaseModel):
+    section: str = ""
+    change: str = ""
+    reason: str = ""
+    evidence_source: str = ""
+
+
+class HonestyReportDetails(BaseModel):
+    status: Literal["pass", "needs_review"]
+    risky_claims: list[str] = Field(default_factory=list)
+    unsupported_claims: list[str] = Field(default_factory=list)
+    safe_rewrite_suggestions: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class ATSScoreDetails(BaseModel):
+    score: int
+    matched_keywords: list[str] = Field(default_factory=list)
+    missing_keywords: list[str] = Field(default_factory=list)
+    strengths: list[str] = Field(default_factory=list)
+    weaknesses: list[str] = Field(default_factory=list)
+    reasoning: str = ""
+
+
+class ResumeRewriteReviewResult(BaseModel):
+    tailored_resume: TailoredResumeDetails
+    change_summary: list[ChangeSummaryItem] = Field(default_factory=list)
+    honesty_report: HonestyReportDetails
+    ats_score: ATSScoreDetails
