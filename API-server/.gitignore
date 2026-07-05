@@ -1,0 +1,9 @@
+node_modules/
+.env
+.DS_Store
+tmp/uploads/*
+tmp/exports/*
+!tmp/uploads/.gitkeep
+!tmp/exports/.gitkeep
+coverage/
+npm-debug.log*

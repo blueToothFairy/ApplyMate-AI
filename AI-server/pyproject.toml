@@ -1,0 +1,9 @@
+[project]
+name = "applymate-ai-server"
+version = "0.1.0"
+description = "FastAPI AI server for ApplyMate AI"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

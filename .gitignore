@@ -1,0 +1,208 @@
+# =========================================================
+# ApplyMate AI - Root .gitignore
+# Covers: React/Vite frontend, Express API-server, FastAPI AI-server
+# =========================================================
+
+# -----------------------------
+# Secrets / environment files
+# -----------------------------
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.secret
+secrets/
+credentials/
+service-account*.json
+*google*credentials*.json
+*firebase*service*account*.json
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+uvicorn*.log
+gunicorn*.log
+celery*.log
+
+# -----------------------------
+# Node / JavaScript / TypeScript
+# -----------------------------
+node_modules/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vite/
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+coverage/
+.nyc_output/
+
+# Package manager local files
+.pnpm-store/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.tox/
+.nox/
+htmlcov/
+.coverage
+.coverage.*
+.cache
+.hypothesis/
+.ipynb_checkpoints/
+
+# Python packaging
+*.egg-info/
+.eggs/
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+
+# -----------------------------
+# Runtime uploads / generated artifacts
+# -----------------------------
+uploads/
+tmp/
+temp/
+.cache/
+.runtime/
+.sessions/
+local-data/
+artifacts/
+exports/
+generated/
+outbox/
+audit-logs/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Keep empty runtime folders if intentionally tracked
+!uploads/.gitkeep
+!tmp/.gitkeep
+!exports/.gitkeep
+!audit-logs/.gitkeep
+
+# -----------------------------
+# User CV/JD/private test documents
+# -----------------------------
+*.pdf
+*.docx
+*.doc
+*.rtf
+*.odt
+*.pages
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.tgz
+!docs/**/*.pdf
+!docs/**/*.docx
+!test-fixtures/**/*.pdf
+!test-fixtures/**/*.docx
+
+# -----------------------------
+# Frontend local files
+# -----------------------------
+frontend/.env
+frontend/.env.*
+frontend/dist/
+frontend/build/
+frontend/node_modules/
+
+# -----------------------------
+# API-server local files
+# -----------------------------
+API-server/.env
+API-server/.env.*
+API-server/node_modules/
+API-server/uploads/
+API-server/tmp/
+API-server/logs/
+API-server/coverage/
+
+# -----------------------------
+# AI-server local files
+# -----------------------------
+AI-server/.env
+AI-server/.env.*
+AI-server/.venv/
+AI-server/venv/
+AI-server/env/
+AI-server/tmp/
+AI-server/logs/
+AI-server/uploads/
+AI-server/exports/
+AI-server/__pycache__/
+
+# -----------------------------
+# IDE / OS
+# -----------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
+
+# -----------------------------
+# Docker / local infrastructure overrides
+# -----------------------------
+docker-compose.override.yml
+.docker/
+
+# -----------------------------
+# Misc
+# -----------------------------
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
