@@ -250,8 +250,8 @@ async function run() {
     console.log('\n');
     
     console.log('3. LLM call log');
-    console.log(`- FitAnalysisAgent: ${callsA + callsB}`);
-    console.log(`- ResumeRewriteReviewAgent: 0 (consolidated logic evaluated inside Step B count)`);
+    console.log(`- FitAnalysisAgent: ${callsB > 0 ? 1 : 0}`);
+    console.log(`- ResumeRewriteReviewAgent: ${callsB > 1 ? 1 : 0}`);
     console.log(`- EmailComposerAgent: ${callsC}`);
     console.log(`- Total logical calls: ${finalCounts.logical_call_count}`);
     console.log(`- Retry attempt counter: ${finalCounts.retry_attempt_count}\n`);
