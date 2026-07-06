@@ -241,9 +241,17 @@ export async function sendApplication(req, res) {
 
   let attachment;
   try {
-    attachment = await aiClient.exportDocx(session.aiApplicationId, emailDraft.attachment_version_id);
+    const buffer = await renderResumePdfBuffer({
+      title: `${aiApplication.role_title || 'Tailored'} CV`,
+      resumeText: selectedVersion.content,
+    });
+    attachment = {
+      buffer,
+      filename: `tailored_cv_${session.aiApplicationId}.pdf`,
+      contentType: 'application/pdf',
+    };
   } catch (err) {
-    // Fallback keeps the send flow usable during demos even if DOCX export fails.
+    // Fallback keeps the send flow usable during demos even if PDF generation fails.
     attachment = {
       buffer: Buffer.from(selectedVersion.content, 'utf8'),
       filename: `tailored_cv_${session.aiApplicationId}.md`,
@@ -277,14 +285,6 @@ export async function sendApplication(req, res) {
   });
 }
 
-export async function exportDocx(req, res) {
-  const session = requireAiApplication(req.params.id);
-  const resumeVersionId = req.query.resume_version_id || session.aiApplication?.selected_resume_version_id;
-  const file = await aiClient.exportDocx(session.aiApplicationId, resumeVersionId);
-  res.setHeader('Content-Type', file.contentType);
-  res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
-  res.send(file.buffer);
-}
 
 export async function exportPdf(req, res) {
   const session = requireAiApplication(req.params.id);

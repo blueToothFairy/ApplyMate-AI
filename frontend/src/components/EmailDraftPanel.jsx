@@ -74,7 +74,7 @@ export default function EmailDraftPanel({ emailDraft, approvalStatus, approvalId
       </div>
 
       <div className="email-envelope-info">
-        <small>Note: The email contains placeholder variables parsed by the EmailComposerAgent. Once approved and sent, the tailored CV is attached automatically as a DOCX/PDF file.</small>
+        <small>Note: The email contains placeholder variables parsed by the EmailComposerAgent. Once approved and sent, the tailored CV is attached automatically as a PDF file.</small>
       </div>
     </div>
   );

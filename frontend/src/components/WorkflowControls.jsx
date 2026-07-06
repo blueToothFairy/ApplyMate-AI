@@ -12,7 +12,6 @@ export default function WorkflowControls({
   onApprove,
   onReject,
   onSend,
-  onExportDocx,
   onExportPdf,
   onRefresh,
   emailSendResult,
@@ -101,13 +100,6 @@ export default function WorkflowControls({
         <div className="workflow-section">
           <h3>Workspace Utilities</h3>
           <div className="button-group-row">
-            <button
-              className="btn-utility"
-              onClick={onExportDocx}
-              disabled={isExportDisabled}
-            >
-              {loadingAction === 'export-docx' ? 'Downloading...' : 'Export DOCX'}
-            </button>
             <button
               className="btn-utility"
               onClick={onExportPdf}

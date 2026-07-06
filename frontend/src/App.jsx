@@ -8,7 +8,6 @@ import {
   rejectApplication,
   sendApplication,
   getApplication,
-  exportDocx,
   exportPdf,
 } from './api/applications';
 
@@ -282,27 +281,6 @@ The candidate CV does not explicitly list Docker or Kubernetes. Do not add Docke
     }
   };
 
-  // Export Tailored DOCX via Blob
-  const handleExportDocx = async () => {
-    setLoadingAction('export-docx');
-    setError(null);
-    try {
-      const blob = await exportDocx(applicationId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tailored_cv_${applicationId}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoadingAction(null);
-    }
-  };
-
   // Export Tailored PDF via Blob
   const handleExportPdf = async () => {
     setLoadingAction('export-pdf');
@@ -396,7 +374,6 @@ The candidate CV does not explicitly list Docker or Kubernetes. Do not add Docke
             onApprove={handleApprove}
             onReject={handleReject}
             onSend={handleSend}
-            onExportDocx={handleExportDocx}
             onExportPdf={handleExportPdf}
             onRefresh={handleRefresh}
             emailSendResult={emailSendResult}

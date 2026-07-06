@@ -4,7 +4,6 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   createApplication,
   draftEmail,
-  exportDocx,
   exportPdf,
   generateTailoredCv,
   getApplication,
@@ -30,5 +29,4 @@ applicationsRouter.post('/:id/approval/request', asyncHandler(requestApproval));
 applicationsRouter.post('/:id/approve', asyncHandler(approveApplication));
 applicationsRouter.post('/:id/reject', asyncHandler(rejectApplication));
 applicationsRouter.post('/:id/send', asyncHandler(sendApplication));
-applicationsRouter.get('/:id/export/docx', asyncHandler(exportDocx));
 applicationsRouter.get('/:id/export/pdf', asyncHandler(exportPdf));

@@ -98,18 +98,6 @@ export async function sendApplication(id) {
   return handleResponse(response);
 }
 
-export async function exportDocx(id) {
-  const response = await fetch(`${BASE_URL}/api/applications/${id}/export/docx`, {
-    method: 'GET',
-    headers: getHeaders(),
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(errText || 'Failed to export DOCX');
-  }
-  return response.blob();
-}
-
 export async function exportPdf(id) {
   const response = await fetch(`${BASE_URL}/api/applications/${id}/export/pdf`, {
     method: 'GET',
